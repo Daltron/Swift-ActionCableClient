@@ -246,7 +246,7 @@ extension ActionCableClient {
             autoSubscribe: autoSubscribe,
             shouldBufferActions: bufferActions)
       
-        self.unconfirmedChannels[channel.uid] = channel
+        self.unconfirmedChannels[channelUID] = channel
       
         if (channel.autoSubscribe) {
           subscribe(channel)
@@ -289,8 +289,8 @@ extension ActionCableClient {
         do {
           try self.transmit(on: channel, as: Command.unsubscribe)
             
-            let message = Message(channelName: channel.uid,
-                                   actionName: nil,
+            let message = Message(channelUid: channel.uid,
+                                  actionName: nil,
                                   messageType: MessageType.cancelSubscription,
                                          data: nil,
                                         error: nil)
@@ -353,7 +353,7 @@ extension ActionCableClient {
         
         let channels = self.channels
         for (_, channel) in channels {
-            let message = Message(channelName: channel.uid, actionName: nil, messageType: MessageType.hibernateSubscription, data: nil, error: nil)
+            let message = Message(channelUid: channel.uid, actionName: nil, messageType: MessageType.hibernateSubscription, data: nil, error: nil)
             onMessage(message)
         }
         
@@ -429,7 +429,7 @@ extension ActionCableClient {
                     DispatchQueue.main.async(execute: callback)
                 }
             case .message:
-                if let channel = channels[message.channelName!] {
+                if let channel = channels[message.channelUid!] {
                     // Notify Channel
                     channel.onMessage(message)
                     
@@ -438,7 +438,7 @@ extension ActionCableClient {
                     }
                 }
             case .confirmSubscription:
-                if let channel = unconfirmedChannels.removeValue(forKey: message.channelName!) {
+                if let channel = unconfirmedChannels.removeValue(forKey: message.channelUid!) {
                     self.channels.updateValue(channel, forKey: channel.uid)
                     
                     // Notify Channel
@@ -450,7 +450,7 @@ extension ActionCableClient {
                 }
             case .rejectSubscription:
                 // Remove this channel from the list of unconfirmed subscriptions
-                if let channel = unconfirmedChannels.removeValue(forKey: message.channelName!) {
+                if let channel = unconfirmedChannels.removeValue(forKey: message.channelUid!) {
                     
                     // Notify Channel
                     channel.onMessage(message)
@@ -460,7 +460,7 @@ extension ActionCableClient {
                     }
                 }
             case .hibernateSubscription:
-              if let channel = channels.removeValue(forKey: message.channelName!) {
+              if let channel = channels.removeValue(forKey: message.channelUid!) {
                 // Add channel into unconfirmed channels
                 unconfirmedChannels[channel.uid] = channel
                 
@@ -468,7 +468,7 @@ extension ActionCableClient {
                 fallthrough
               }
             case .cancelSubscription:
-                if let channel = channels.removeValue(forKey: message.channelName!) {
+                if let channel = channels.removeValue(forKey: message.channelUid!) {
                     
                     // Notify Channel
                     channel.onMessage(message)

@@ -84,14 +84,14 @@ internal enum MessageType {
 }
 
 internal struct Message {
-    var channelName : String?
+    var channelUid : String?
     var actionName : String?
     var messageType : MessageType
     var data : Any?
     var error: Swift.Error?
   
     static func simple(_ channel: Channel, messageType: MessageType) -> Message {
-        return Message(channelName: channel.name,
+        return Message(channelUid: channel.uid,
                         actionName: nil,
                        messageType: messageType,
                               data: nil,

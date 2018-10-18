@@ -79,7 +79,6 @@ internal class JSONSerializer {
             }
           
             var channelName: String?
-            var channelIdentifier: String?
             if let idObj = JSONObj["identifier"] {
                 var idJSON: Dictionary<String, AnyObject>
                 if let idString = idObj as? String {
@@ -97,16 +96,12 @@ internal class JSONSerializer {
                     throw SerializationError.protocolViolation
                 }
                 
-                if let item = idJSON.first {
-                    channelIdentifier = item.value as? String
-                }
-                
                 if let nameStr = idJSON["channel"], let name = nameStr as? String {
-                  channelName = name
+                    channelName = name
                 }
                 
-                if channelIdentifier != nil {
-                    channelName = channelIdentifier
+                if let channelObjectIdString = idJSON["id"], let channelObjectId = channelObjectIdString as? String {
+                    channelName = channelObjectId
                 }
             }
           
@@ -116,7 +111,7 @@ internal class JSONSerializer {
                 guard let _ = channelName
                   else { throw SerializationError.protocolViolation }
                 
-                return Message(channelName: channelName,
+                return Message(channelUid: channelName,
                                actionName:  nil,
                                messageType: messageType,
                                data: nil,
@@ -124,7 +119,7 @@ internal class JSONSerializer {
               
             // Welcome/Ping messages
             case .welcome, .ping:
-                return Message(channelName: nil,
+                return Message(channelUid: nil,
                                actionName: nil,
                                messageType: messageType,
                                data: nil,
@@ -152,7 +147,7 @@ internal class JSONSerializer {
                   messageError = error
                 }
                 
-                return Message(channelName: channelName!,
+                return Message(channelUid: channelName!,
                                actionName: messageActionName,
                                messageType: MessageType.message,
                                data: messageValue,
